@@ -1,10 +1,23 @@
 const fs=require("fs/promises");
 
 (async()=>{
+  const createFile= async (path)=>{
+    try{
+      // here checking whether the file is exits or not
+      const existingFileHandle=await fs.open( path,"r");
+      existingFileHandle.close();  // closing of the file is very important to avoid the memory leak
+      return console.log(`The file path ${path} already exits.`);
+    } catch(e){
+      const newFileHandle= await fs.open(path,"w");
+      console.log("A file is successfully created.");
+      newFileHandle.close();
+    }
+  };
+  const CREATE_FILE="create a file"
   // opening file
   const commanFileHandler=await fs.open("./command.txt","r");  // opened in read mode
   commanFileHandler.on("change", async()=>{
-    console.log("file was changed");
+    // console.log("file was changed");
 
     // reading content of the file
 
@@ -19,8 +32,14 @@ const fs=require("fs/promises");
 
     // reding whole content from begining to the end
     const content=await commanFileHandler.read(buff,offSet,length,position);
-    console.log(content);
-    console.log(buff.toString("utf-8"));
+    // console.log(content);
+    const command=buff.toString("utf-8");
+    if(command.includes(CREATE_FILE)){
+      const file_path=command.substring(CREATE_FILE.length+1);
+      createFile(file_path);
+    }
+    // create a file
+    // create a file <path>
   })
   const watcher=fs.watch("./");// watching whole directory
   for await (const event of watcher){
