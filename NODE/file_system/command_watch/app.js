@@ -1,4 +1,5 @@
 const fs=require("fs/promises");
+const { clearScreenDown } = require("readline");
 
 (async()=>{
   const createFile= async (path)=>{
@@ -13,7 +14,28 @@ const fs=require("fs/promises");
       newFileHandle.close();
     }
   };
+
+  // deleting the file
+  const deletefile=async (path) =>{
+    try{
+      await fs.unlink(path);  // unlinking the path
+      console.log("the file was successfully deleted");
+    }
+    catch(e){
+      if(e.code=="ENOENT"){
+        console.log("there is no file is to remove");
+      }
+      else{
+        console.log("an error occured while deleting the file");
+        console.log(e);
+      }
+    }
+  };
+
   const CREATE_FILE="create a file"
+  const DELETE_FILE="delete the file";
+  const RENAME_FILE="rename the file";
+  const ADD_TO_FILE="add to the file";
   // opening file
   const commanFileHandler=await fs.open("./command.txt","r");  // opened in read mode
   commanFileHandler.on("change", async()=>{
@@ -41,6 +63,10 @@ const fs=require("fs/promises");
     // create a file
     // create a file <path>
   })
+  if(command.includes(DELETE_FILE)){
+    const filePath=command.substring(DELETE_FILE.length+1);
+    deleteFile(filePath);
+  }
   const watcher=fs.watch("./");// watching whole directory
   for await (const event of watcher){
     if(event.eventType==="change"&&event.filename==="command.txt"){
